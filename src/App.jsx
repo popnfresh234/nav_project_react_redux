@@ -8,8 +8,16 @@ import Private from './Pages/Private.jsx';
 import Profile from './Pages/Profile.jsx';
 import Info from './Pages/Info.jsx';
 import { setNavPosition } from './navActions';
+import Auth from './Auth/Auth.jsx';
+import Callback from './Auth/Callback.jsx';
 
 class App extends Component {
+  constructor( props ) {
+    super( props );
+    this.auth = new Auth( props.history );
+    this.handleAuthentication = this.handleAuthentication.bind( this );
+  }
+
   componentDidMount() {
     this.handleNav( );
   }
@@ -17,6 +25,13 @@ class App extends Component {
   componentDidUpdate() {
     this.handleNav( );
   }
+
+  handleAuthentication = ( nextState, replace ) => {
+    if ( /access_token|id_token|error/.test( nextState.location.hash ) ) {
+      this.auth.handleAuthentication();
+    }
+  };
+
 
   handleNav( ) {
     const { setNavPos, history } = this.props;
@@ -26,7 +41,7 @@ class App extends Component {
   render() {
     return (
       <div>
-        <NavBar />
+        <NavBar auth={this.auth} />
         <Switch>
           <Route
             path="/home"
@@ -39,7 +54,7 @@ class App extends Component {
             path="/profile"
             exact
             render={props => (
-              <Profile {...props} />
+              <Profile auth={this.auth} {...props} />
             )}
           />
           <Route
@@ -55,6 +70,15 @@ class App extends Component {
             render={props => (
               <Info {...props} />
             )}
+          />
+
+          <Route
+            path="/callback"
+            exact
+            render={( props ) => {
+              this.handleAuthentication( props );
+              return <Callback {...props} />;
+            }}
           />
         </Switch>
       </div>
