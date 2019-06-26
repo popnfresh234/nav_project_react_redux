@@ -20,6 +20,11 @@ class App extends Component {
 
   componentDidMount() {
     this.handleNav( );
+
+    if ( localStorage.getItem( 'isLoggedIn' ) === 'true' ) {
+      console.log( 'renew' );
+      this.auth.renewSession();
+    }
   }
 
   componentDidUpdate() {
