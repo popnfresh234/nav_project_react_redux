@@ -7,7 +7,7 @@ import Home from './Pages/Home.jsx';
 import Private from './Pages/Private.jsx';
 import Profile from './Pages/Profile.jsx';
 import Info from './Pages/Info.jsx';
-import { setNavPosition } from './navActions';
+import { setNavPosition } from './redux/actions/navActions';
 import Auth from './Auth/Auth.jsx';
 import Callback from './Auth/Callback.jsx';
 
@@ -22,7 +22,6 @@ class App extends Component {
     this.handleNav( );
 
     if ( localStorage.getItem( 'isLoggedIn' ) === 'true' ) {
-      console.log( 'renew' );
       this.auth.renewSession();
     }
   }

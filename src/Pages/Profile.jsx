@@ -1,43 +1,40 @@
+/* eslint-disable react/prop-types */
 import React, { Component } from 'react';
-
+import { connect } from 'react-redux';
 
 class Profile extends Component {
-  constructor( props ) {
-    super( props );
-    this.state = {
-      profile: {},
-    };
-  }
-
-  componentDidMount() {
-    const { auth } = this.props;
-    if ( auth.isAuthenticated() ) {
-      if ( !auth.userProfile ) {
-        auth.getProfile( ( err, profile ) => {
-          this.setState( { profile } );
-        } );
-      } else {
-        const profile = auth.userProfile;
-        this.setState( { profile } );
-      }
-    }
-  }
-
   render() {
-    const { auth } = this.props;
+    const {
+      profile, loading, rejected,
+    } = this.props;
 
     return (
-      auth.isAuthenticated() ? (
-        <div>
-          <img src={this.state.profile.picture} />
-          <h4>{this.state.profile.name}</h4>
-        </div>
-      ) : (
-        <h4>This is a private route</h4>
-      )
+      <div>
+        {rejected && (
+        <h4>Something went wrong!</h4>
+        )}
 
+        {loading && (
+          <h4>Loading</h4>
+        )}
+
+        {Object.keys( profile ).length > 0 && (
+          <div>
+            <img src={profile.picture} alt="Profile" />
+            <h4>{profile.name}</h4>
+          </div>
+        )}
+      </div>
     );
   }
 }
 
-export default Profile;
+const mapStateToProps = state => ( {
+  loading: state.authState.loading,
+  rejected: state.authState.rejected,
+  profile: state.authState.profile,
+  errorMessage: state.authState.errorMessage,
+  loggedIn: state.authState.loggedIn,
+} );
+
+export default connect( mapStateToProps )( Profile );

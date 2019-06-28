@@ -4,7 +4,7 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import { createStore } from 'redux';
 import { Provider } from 'react-redux';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import rootReducer from './rootReducer';
+import rootReducer from './redux/reducers/rootReducer';
 import App from './App.jsx';
 
 const store = createStore(
@@ -22,3 +22,5 @@ ReactDOM.render(
   </Provider>,
   document.getElementById( 'react-root' ),
 );
+
+export default store;

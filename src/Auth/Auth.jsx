@@ -1,6 +1,11 @@
 // src/Auth/Auth.js
 
 import auth0 from 'auth0-js';
+import axios from 'axios';
+import store from '../Index.jsx';
+import {
+  setLoggedIn, userProfileSuccess, userProfileLoading, userProfileRejected, setAccessToken,
+} from '../redux/actions/authActions';
 
 class Auth {
   accessToken;
@@ -54,32 +59,46 @@ class Auth {
     return this.idToken;
   }
 
-  setSession( authResult ) {
-    // Set isLoggedIn flag in local storage
+  setSession( authResult, renew ) {
     localStorage.setItem( 'isLoggedIn', 'true' );
+    store.dispatch( setLoggedIn( true ) );
     const expiresAt = ( authResult.expiresIn * 1000 ) + new Date().getTime();
     this.accessToken = authResult.accessToken;
+    store.dispatch( setAccessToken( authResult.accessToken ) );
     this.idToken = authResult.idToken;
     this.expiresAt = expiresAt;
 
-    // navigate to the home route
-    this.history.replace( '/home' ); // This takes us away from callback route
+    const headers = {
+      Authorization: `Bearer ${authResult.accessToken}`,
+    };
+    store.dispatch( userProfileLoading() );
+    axios.post( 'http://localhost:8081/api/profile', authResult.idTokenPayload, { headers } )
+      .then( ( result ) => {
+        store.dispatch( userProfileSuccess( result.data ) );
+      } ).catch( ( err ) => {
+        store.dispatch( userProfileRejected( err.message ) );
+      } );
+
+
+    // navigate to the home route if not renewing
+    if ( !renew ) {
+      this.history.replace( '/home' ); // This takes us away from callback route
+    }
   }
 
   // Get user profile
-  getProfile( cb ) {
+  getProfile() {
     this.auth0.client.userInfo( this.accessToken, ( err, profile ) => {
       if ( profile ) {
         this.userProfile = profile;
       }
-      cb( err, profile );
     } );
   }
 
   renewSession() {
     this.auth0.checkSession( {}, ( err, authResult ) => {
       if ( authResult && authResult.accessToken && authResult.idToken ) {
-        this.setSession( authResult );
+        this.setSession( authResult, true );
       } else if ( err ) {
         this.logout();
         console.log( err );
@@ -98,7 +117,7 @@ class Auth {
 
     // Remove isLoggedInFlag from local storage
     localStorage.removeItem( 'isLoggedIn' );
-
+    store.dispatch( setLoggedIn( false ) );
     this.auth0.logout( {
       returnTo: window.location.origin,
     } );

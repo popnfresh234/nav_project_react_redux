@@ -1,4 +1,4 @@
-import { SET_NAV_POSITION } from './navActions';
+import { SET_NAV_POSITION } from '../actions/navActions';
 
 
 const initialState = {
@@ -7,11 +7,12 @@ const initialState = {
 
 function navReducer( state = initialState, action ) {
   const lookup = {
-    SET_NAV_POSITION: () => ( {
+    [SET_NAV_POSITION]: () => ( {
       ...state,
       navPos: action.navPos,
     } ),
   };
+
 
   const fn = lookup[action.type];
   if ( fn ) {

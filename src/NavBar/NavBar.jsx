@@ -9,7 +9,10 @@ import LinkTab from './LinkTab.jsx';
 
 class NavBar extends Component {
   render() {
-    const { navPos, history, auth } = this.props;
+    const {
+      navPos, history, auth, loggedIn,
+    } = this.props;
+
     return (
       <div>
         <AppBar position="static">
@@ -18,7 +21,7 @@ class NavBar extends Component {
             <LinkTab label="Profile" to="/profile" history={history} />
             <LinkTab label="Private" to="/private" history={history} />
             <LinkTab label="Info" to="/info" history={history} />
-            {!auth.isAuthenticated() && (
+            {!loggedIn && (
             <Tab
               label="Login"
               onClick={( event ) => {
@@ -27,7 +30,7 @@ class NavBar extends Component {
             />
             )}
 
-            {auth.isAuthenticated() && (
+            {loggedIn && (
             <Tab
               label="Logout"
               onClick={( event ) => {
@@ -45,6 +48,7 @@ class NavBar extends Component {
 function mapStateToProps( state ) {
   return {
     navPos: state.navState.navPos,
+    loggedIn: state.authState.loggedIn,
   };
 }
 
