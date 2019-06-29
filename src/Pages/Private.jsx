@@ -6,29 +6,43 @@ import { recipesLoading, recipesSuccess, recipesRejected } from '../redux/action
 
 
 class Private extends Component {
+  componentDidMount() {
+    const { accessToken } = this.props;
+    if ( accessToken ) {
+      this.getRecipes();
+    }
+  }
+
+
   componentDidUpdate( prevProps ) {
-    const {
-      accessToken, recipes, recipesLoading, recipesSuccess,
-    } = this.props;
+    const { accessToken } = this.props;
 
     if ( accessToken !== prevProps.accessToken ) {
-      const headers = {
-        Authorization: `Bearer ${accessToken}`,
-      };
-      recipesLoading();
-      axios.get( 'http://localhost:8081/api/private', { headers } )
-        .then( ( result ) => {
-          recipesSuccess( result.data );
-        } ).catch( ( err ) => {
-          recipesRejected( err );
-        } );
+      this.getRecipes();
     }
+  }
+
+  getRecipes() {
+    const {
+      accessToken, recipesLoading, recipesSuccess, recipesRejected,
+    } = this.props;
+    const headers = {
+      Authorization: `Bearer ${accessToken}`,
+    };
+    recipesLoading();
+    axios.get( 'http://localhost:8081/api/private', { headers } )
+      .then( ( result ) => {
+        recipesSuccess( result.data );
+      } ).catch( ( err ) => {
+        recipesRejected( err );
+      } );
   }
 
   render() {
     const {
       loading, rejected, errormessage, recipes,
     } = this.props;
+
     return (
       <Typography component="div" style={{ padding: 8 * 3 }}>
         {loading && (

@@ -1,15 +1,15 @@
-import { SET_NAV_POSITION } from '../actions/navActions';
+import { SET_NAV_PATH } from '../actions/navActions';
 
 
 const initialState = {
-  navPos: 0,
+  navPath: '/home',
 };
 
 function navReducer( state = initialState, action ) {
   const lookup = {
-    [SET_NAV_POSITION]: () => ( {
+    [SET_NAV_PATH]: () => ( {
       ...state,
-      navPos: action.navPos,
+      navPath: action.navPath,
     } ),
   };
 

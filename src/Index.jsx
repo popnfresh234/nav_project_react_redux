@@ -6,6 +6,7 @@ import { Provider } from 'react-redux';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import rootReducer from './redux/reducers/rootReducer';
 import App from './App.jsx';
+import 'antd/dist/antd.css';
 
 const store = createStore(
   rootReducer,

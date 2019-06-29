@@ -2,14 +2,19 @@ import React, { Component } from 'react';
 import { Route, Switch, withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
+import { Layout } from 'antd';
 import NavBar from './NavBar/NavBar.jsx';
 import Home from './Pages/Home.jsx';
 import Private from './Pages/Private.jsx';
 import Profile from './Pages/Profile.jsx';
 import Info from './Pages/Info.jsx';
-import { setNavPosition } from './redux/actions/navActions';
+import { setNavPath } from './redux/actions/navActions';
 import Auth from './Auth/Auth.jsx';
 import Callback from './Auth/Callback.jsx';
+
+const {
+  Header, Content, Footer,
+} = Layout;
 
 class App extends Component {
   constructor( props ) {
@@ -38,63 +43,71 @@ class App extends Component {
 
 
   handleNav( ) {
-    const { setNavPos, history } = this.props;
-    setNavPos( history.location.pathname );
+    const { setNavPath, history } = this.props;
+    setNavPath( history.location.pathname );
   }
 
   render() {
     return (
-      <div>
+      <Layout>
         <NavBar auth={this.auth} />
-        <Switch>
-          <Route
-            path="/home"
-            exact
-            render={props => (
-              <Home {...props} />
-            )}
-          />
-          <Route
-            path="/profile"
-            exact
-            render={props => (
-              <Profile auth={this.auth} {...props} />
-            )}
-          />
-          <Route
-            path="/private"
-            exact
-            render={props => (
-              <Private {...props} />
-            )}
-          />
-          <Route
-            path="/info"
-            exact
-            render={props => (
-              <Info {...props} />
-            )}
-          />
+        <Layout style={{ minHeight: '100vh' }}>
+          <Header style={{ background: '#fff', padding: 0, textAlign: 'center' }}>
+            Recipe Voting App
+          </Header>
+          <Content style={{ margin: '24px 16px 0' }}>
+            <Switch>
+              <Route
+                path="/home"
+                exact
+                render={props => (
+                  <Home {...props} />
+                )}
+              />
+              <Route
+                path="/profile"
+                exact
+                render={props => (
+                  <Profile auth={this.auth} {...props} />
+                )}
+              />
+              <Route
+                path="/private"
+                exact
+                render={props => (
+                  <Private {...props} />
+                )}
+              />
+              <Route
+                path="/info"
+                exact
+                render={props => (
+                  <Info {...props} />
+                )}
+              />
 
-          <Route
-            path="/callback"
-            exact
-            render={( props ) => {
-              this.handleAuthentication( props );
-              return <Callback {...props} />;
-            }}
-          />
-        </Switch>
-      </div>
+              <Route
+                path="/callback"
+                exact
+                render={( props ) => {
+                  this.handleAuthentication( props );
+                  return <Callback {...props} />;
+                }}
+              />
+            </Switch>
+          </Content>
+          <Footer style={{ textAlign: 'center' }}>Ant Design ©2018 Created by Ant UED</Footer>
+        </Layout>
+      </Layout>
     );
   }
 }
 const mapDispatchToProps = dispatch => ( {
-  setNavPos: pos => dispatch( setNavPosition( pos ) ),
+  setNavPath: pos => dispatch( setNavPath( pos ) ),
 } );
 
 App.propTypes = {
-  setNavPos: PropTypes.func.isRequired,
+  setNavPath: PropTypes.func.isRequired,
   // eslint-disable-next-line react/forbid-prop-types
   history: PropTypes.object.isRequired,
 };
