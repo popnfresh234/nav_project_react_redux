@@ -18,11 +18,13 @@ class Profile extends Component {
           <h4>Loading</h4>
         )}
 
-        {Object.keys( profile ).length > 0 && (
+        {Object.keys( profile ).length > 0 ? (
           <div>
             <img src={profile.picture} alt="Profile" />
             <h4>{profile.name}</h4>
           </div>
+        ) : (
+          <h4>Please log in</h4>
         )}
       </div>
     );

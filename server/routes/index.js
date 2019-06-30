@@ -27,13 +27,16 @@ router.get( '/public', ( req, res ) => {
 } );
 
 router.post( '/profile', jwtCheck, ( req, res ) => {
+  const {
+    at_hash, aud, exp, iat, iss, nonce, ...body
+  } = req.body;
   knex.select()
     .from( 'users' )
     .where( 'sub', req.body.sub )
     .then( ( result ) => {
       if ( result.length === 0 ) {
         return knex( 'users' )
-          .insert( req.body );
+          .insert( body );
       }
       return result;
     } )

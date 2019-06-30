@@ -23,8 +23,19 @@ class NavBar extends Component {
   }
 
   hanldeMenuClick( event ) {
-    const { history } = this.props;
-    history.push( event.key );
+    const { history, auth } = this.props;
+    const lookup = {
+      '/login': () => auth.login(),
+      '/logout': () => auth.logout(),
+
+    };
+
+    const fn = lookup[event.key];
+    if ( fn ) {
+      fn();
+    } else {
+      history.push( event.key );
+    }
   }
 
   render() {
@@ -34,65 +45,46 @@ class NavBar extends Component {
     return (
       <Sider
         breakpoint="lg"
-        collapsedWidth="0"
+        theme="dark"
+        collapsible
         onBreakpoint={( broken ) => {
-          console.log( 'broken:', broken );
         }}
         onCollapse={( collapsed, type ) => {
-          console.log( collapsed, type );
         }}
       >
         <div className="logo" />
         <Menu theme="dark" mode="inline" onClick={this.hanldeMenuClick} selectedKeys={[navPath]}>
           <Menu.Item key="/home">
-            <Icon type="user" />
+            <Icon type="home" />
             <span className="nav-text">Home</span>
           </Menu.Item>
           <Menu.Item key="/profile">
-            <Icon type="video-camera" />
+            <Icon type="user" />
             <span className="nav-text">Profile</span>
           </Menu.Item>
           <Menu.Item key="/private">
-            <Icon type="upload" />
+            <Icon type="lock" />
             <span className="nav-text">Private</span>
           </Menu.Item>
           <Menu.Item key="/info">
-            <Icon type="user" />
+            <Icon type="info" />
             <span className="nav-text">Info</span>
           </Menu.Item>
+          {!loggedIn && (
+          <Menu.Item key="/login">
+            <Icon type="login" />
+            <span className="nav-text">Login</span>
+          </Menu.Item>
+          )}
+          {loggedIn && (
+          <Menu.Item key="/logout">
+            <Icon type="logout" />
+            <span className="nav-text">Logout</span>
+          </Menu.Item>
+          )}
         </Menu>
       </Sider>
     );
-
-    //   return (
-    //     <div>
-    //       <AppBar position="static">
-    //         <Tabs value={navPos}>
-    //           <LinkTab label="Home" to="/home" history={history} />
-    //           <LinkTab label="Profile" to="/profile" history={history} />
-    //           <LinkTab label="Private" to="/private" history={history} />
-    //           <LinkTab label="Info" to="/info" history={history} />
-    //           {!loggedIn && (
-    //           <Tab
-    //             label="Login"
-    //             onClick={( event ) => {
-    //               auth.login();
-    //             }}
-    //           />
-    //           )}
-
-  //           {loggedIn && (
-  //           <Tab
-  //             label="Logout"
-  //             onClick={( event ) => {
-  //               auth.logout();
-  //             }}
-  //           />
-  //           )}
-  //         </Tabs>
-  //       </AppBar>
-  //     </div>
-  //   );
   }
 }
 

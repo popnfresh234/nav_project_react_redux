@@ -67,19 +67,7 @@ class Auth {
     store.dispatch( setAccessToken( authResult.accessToken ) );
     this.idToken = authResult.idToken;
     this.expiresAt = expiresAt;
-
-    const headers = {
-      Authorization: `Bearer ${authResult.accessToken}`,
-    };
-    store.dispatch( userProfileLoading() );
-    axios.post( 'http://localhost:8081/api/profile', authResult.idTokenPayload, { headers } )
-      .then( ( result ) => {
-        store.dispatch( userProfileSuccess( result.data ) );
-      } ).catch( ( err ) => {
-        store.dispatch( userProfileRejected( err.message ) );
-      } );
-
-
+    this.getProfile();
     // navigate to the home route if not renewing
     if ( !renew ) {
       this.history.replace( '/home' ); // This takes us away from callback route
@@ -88,9 +76,19 @@ class Auth {
 
   // Get user profile
   getProfile() {
+    store.dispatch( userProfileLoading() );
     this.auth0.client.userInfo( this.accessToken, ( err, profile ) => {
       if ( profile ) {
         this.userProfile = profile;
+        const headers = {
+          Authorization: `Bearer ${this.accessToken}`,
+        };
+        axios.post( 'http://localhost:8081/api/profile', profile, { headers } )
+          .then( ( result ) => {
+            store.dispatch( userProfileSuccess( result.data ) );
+          } ).catch( ( err ) => {
+            store.dispatch( userProfileRejected( err.message ) );
+          } );
       }
     } );
   }

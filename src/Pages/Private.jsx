@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
+import { List } from 'antd';
+
 import axios from 'axios';
 import { connect } from 'react-redux';
 import Typography from '@material-ui/core/Typography';
+import RecipeListItem from '../Recipes/RecipeListItem.jsx';
 import { recipesLoading, recipesSuccess, recipesRejected } from '../redux/actions/recipesActions';
 
 
@@ -40,7 +43,7 @@ class Private extends Component {
 
   render() {
     const {
-      loading, rejected, errormessage, recipes,
+      loading, rejected, errormessage, recipes, loggedIn,
     } = this.props;
 
     return (
@@ -53,16 +56,17 @@ class Private extends Component {
           <h4>Something went wrong!</h4>
         )}
 
-        {recipes && recipes.map( recipe => (
+        {loggedIn ? (
+          <List
+            itemLayout="vertical"
+            bordered="true"
+          >
+            {recipes && recipes.map( recipe => (
+              <RecipeListItem key={recipe.id} recipe={recipe} vote_count={recipe.vote_count} />
+            ) )}
+          </List>
+        ) : ( <h4>Please Log In</h4> )}
 
-          <h4 key={recipe.id}>
-            {recipe.name}
-            {' '}
-            Vote Count:
-            {' '}
-            {recipe.vote_count}
-          </h4>
-        ) )}
       </Typography>
     );
   }
@@ -74,10 +78,12 @@ const mapStateToProps = state => ( {
   rejected: state.recipesState.rejected,
   errorMessage: state.recipesState.errorMessage,
   recipes: state.recipesState.recipes,
+  loggedIn: state.authState.loggedIn,
 } );
 
 const mapDispatchToProps = dispatch => ( {
   recipesLoading: () => dispatch( recipesLoading() ),
   recipesSuccess: recipes => dispatch( recipesSuccess( recipes ) ),
+  recipesRejected: err => dispatch( recipesRejected( err ) ),
 } );
 export default connect( mapStateToProps, mapDispatchToProps )( Private );
