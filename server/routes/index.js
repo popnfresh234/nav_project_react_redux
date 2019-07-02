@@ -3,6 +3,7 @@ const express = require( 'express' );
 const router = express.Router();
 const jwt = require( 'express-jwt' );
 const jwks = require( 'jwks-rsa' );
+const fs = require( 'fs' );
 require( 'dotenv' ).config();
 
 const ENV = process.env.ENV || 'development';
@@ -26,7 +27,7 @@ router.get( '/public', ( req, res ) => {
   res.status( 200 ).send( 'These will eventually be recipes' );
 } );
 
-router.post( '/profile', jwtCheck, ( req, res ) => {
+router.post( '/profile', jwtCheck, ( req, res, next ) => {
   const {
     at_hash, aud, exp, iat, iss, nonce, ...body
   } = req.body;
@@ -44,35 +45,60 @@ router.post( '/profile', jwtCheck, ( req, res ) => {
       res.status( 200 ).send( JSON.stringify( result[0] ) );
     } )
     .catch( ( err ) => {
-      res.status( 500 ).send( 'Something went wrong' );
-      console.log( err );
+      next( err );
     } );
 } );
 
-router.get( '/private', jwtCheck, ( req, res ) => {
-  // knex.select()
-  //   .from( 'recipes' )
-  //   .then( ( result ) => {
-  //     res.status( 200 ).send( result );
-  //   } ).catch( ( err ) => {
-  //     console.log( err );
-  //     res.status( 500 ).send( 'Something went wrong' );
-  //   } );
+router.get( '/private/:sub', jwtCheck, ( req, res, next ) => {
+  knex.select( 'id' )
+    .from( 'users' )
+    .where( 'sub', req.params.sub )
+    .then( ( result ) => {
+      if ( result[0] ) {
+        return result[0].id;
+      } throw new Error( 'No user found' );
+    } )
+    .then( ( userId ) => {
+      let selectRecipesSql = fs.readFileSync( process.env.QUERY_ROOT + process.env.SELECT_RECIPES ).toString();
+      selectRecipesSql = selectRecipesSql.replace( '?', userId );
+      return knex.raw( selectRecipesSql ).then( result => result.rows );
+    } )
+    .then( ( result ) => {
+      res.status( 200 ).send( result );
+    } )
+    .catch( ( err ) => {
+      next( err );
+    } );
+} );
 
-
-  knex.raw(
-    'select id, name, author, category, description, duration, image_url, note, r.user_id,'
-    + 'COALESCE (sum(vote_flag),0) as vote_count '
-    + 'FROM votes v '
-    + 'RIGHT OUTER JOIN recipes r '
-    + 'ON r.id = v.recipe_id '
-    + 'GROUP BY r.id, name, author, category, description, duration, image_url, note, r.user_id '
-    + 'ORDER BY vote_count DESC;',
-  ).then( ( result ) => {
-    res.status( 200 ).send( result.rows );
-  } ).catch( ( err ) => {
-    console.log( err );
-  } );
+router.post( '/vote/:sub', jwtCheck, ( req, res, next ) => {
+  let userId = '';
+  console.log( req.body );
+  knex.select( 'id' )
+    .from( 'users' )
+    .where( 'sub', req.params.sub )
+    .then( ( userResult ) => {
+      if ( userResult[0] ) {
+        return userResult[0].id;
+      } throw new Error( 'No User found' );
+    } )
+    .then( ( id ) => {
+      userId = id;
+      let insertVoteSql = fs.readFileSync( process.env.QUERY_ROOT + process.env.INSERT_VOTE ).toString();
+      insertVoteSql = insertVoteSql.replace( /\$voteFlag/g, req.body.voteFlag ).replace( /\$recipeId/g, req.body.recipeId ).replace( /\$userId/g, userId );
+      return knex.raw( insertVoteSql ).then( result => result );
+    } )
+    .then( ( ) => {
+      let selectRecipesSql = fs.readFileSync( process.env.QUERY_ROOT + process.env.SELECT_RECIPES ).toString();
+      selectRecipesSql = selectRecipesSql.replace( '?', userId );
+      return knex.raw( selectRecipesSql ).then( result => result.rows );
+    } )
+    .then( ( recipeResults ) => {
+      res.status( 200 ).send( recipeResults );
+    } )
+    .catch( ( err ) => {
+      next( err );
+    } );
 } );
 
 module.exports = router;

@@ -1,11 +1,14 @@
 import {
-  SET_ACCESS_TOKEN, SET_LOGGED_IN, FETCH_USER_PROFILE_LOADING, FETCH_USER_PROFILE_REJECTED, FETCH_USER_PROFILE_SUCCESS,
+  AUTH_DATA, SET_LOGGED_IN,
+  FETCH_USER_PROFILE_LOADING,
+  FETCH_USER_PROFILE_REJECTED,
+  FETCH_USER_PROFILE_SUCCESS,
 } from '../actions/authActions';
 
 
 const initialState = {
   profile: {},
-  accessToken: '',
+  authData: {},
   loggedIn: false,
   loading: false,
   rejected: false,
@@ -14,9 +17,9 @@ const initialState = {
 
 function authReducer( state = initialState, action ) {
   const lookup = {
-    [SET_ACCESS_TOKEN]: () => ( {
+    [AUTH_DATA]: () => ( {
       ...state,
-      accessToken: action.payload,
+      authData: action.payload,
     } ),
     [SET_LOGGED_IN]: () => ( {
       ...state,

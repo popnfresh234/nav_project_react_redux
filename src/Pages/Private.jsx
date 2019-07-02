@@ -10,42 +10,40 @@ import { recipesLoading, recipesSuccess, recipesRejected } from '../redux/action
 
 class Private extends Component {
   componentDidMount() {
-    const { accessToken } = this.props;
-    if ( accessToken ) {
+    const { authData } = this.props;
+    if ( authData.accessToken ) {
       this.getRecipes();
     }
   }
 
 
   componentDidUpdate( prevProps ) {
-    const { accessToken } = this.props;
-
-    if ( accessToken !== prevProps.accessToken ) {
+    const { authData } = this.props;
+    if ( authData.accessToken !== prevProps.authData.accessToken ) {
       this.getRecipes();
     }
   }
 
   getRecipes() {
     const {
-      accessToken, recipesLoading, recipesSuccess, recipesRejected,
+      authData, recipesLoading, recipesSuccess, recipesRejected,
     } = this.props;
     const headers = {
-      Authorization: `Bearer ${accessToken}`,
+      Authorization: `Bearer ${authData.accessToken}`,
     };
     recipesLoading();
-    axios.get( 'http://localhost:8081/api/private', { headers } )
+    axios.get( `http://localhost:8081/api/private/${authData.sub}`, { headers } )
       .then( ( result ) => {
         recipesSuccess( result.data );
       } ).catch( ( err ) => {
-        recipesRejected( err );
+        recipesRejected( err.response.data );
       } );
   }
 
   render() {
     const {
-      loading, rejected, errormessage, recipes, loggedIn,
+      loading, rejected, errorMessage, recipes = [], loggedIn,
     } = this.props;
-
     return (
       <Typography component="div" style={{ padding: 8 * 3 }}>
         {loading && (
@@ -53,7 +51,7 @@ class Private extends Component {
         )}
 
         {rejected && (
-          <h4>Something went wrong!</h4>
+          <h4>{errorMessage}</h4>
         )}
 
         {loggedIn ? (
@@ -61,7 +59,7 @@ class Private extends Component {
             itemLayout="vertical"
             bordered="true"
           >
-            {recipes && recipes.map( recipe => (
+            {recipes && !loading && recipes.map( recipe => (
               <RecipeListItem key={recipe.id} recipe={recipe} vote_count={recipe.vote_count} />
             ) )}
           </List>
@@ -73,7 +71,8 @@ class Private extends Component {
 }
 
 const mapStateToProps = state => ( {
-  accessToken: state.authState.accessToken,
+  profile: state.authState.profile,
+  authData: state.authState.authData,
   loading: state.recipesState.loading,
   rejected: state.recipesState.rejected,
   errorMessage: state.recipesState.errorMessage,

@@ -1,10 +1,13 @@
-import { FETCH_RECIPES_LOADING, FETCH_RECIPES_SUCCESS, FETCH_RECIPES_REJECTED } from '../actions/recipesActions';
+import {
+  FETCH_RECIPES_LOADING, FETCH_RECIPES_SUCCESS, FETCH_RECIPES_REJECTED, SET_VOTED,
+} from '../actions/recipesActions';
 
 const initialState = {
   recipes: [],
   loading: false,
   rejected: false,
   errorMessage: '',
+  voted: false,
 };
 
 function recipesReducer( state = initialState, action ) {
@@ -25,6 +28,10 @@ function recipesReducer( state = initialState, action ) {
       rejected: true,
       loading: false,
       errorMessage: action.payload,
+    } ),
+    [SET_VOTED]: () => ( {
+      ...state,
+      voted: action.payload,
     } ),
   };
 

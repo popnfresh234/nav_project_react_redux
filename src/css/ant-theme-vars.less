@@ -1,4 +1,22 @@
 @import '~antd/dist/antd.less';
+@primary-orange: #db5817;
+@primary-brown : #472b2b;
+@secondary-brown: #362121;
+@primary-green: #3d4c35;
 
-@primary-color: #db5817;
-@layout-header-background:#472b2b;
+@primary-color:@primary-orange;
+@layout-header-background:@primary-brown;
+@layout-trigger-background:@secondary-brown;
+
+.primary-color {
+    color: @primary-orange;
+}
+
+.primary-background {
+    color: @primary-brown
+}
+
+.secondary-background {
+    color: @primary-green;
+    background: @primary-green;
+}

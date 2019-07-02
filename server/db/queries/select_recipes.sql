@@ -9,11 +9,11 @@ SELECT
     r.user_id AS author,
     (
         SELECT
-            vote_flag as users_vote
+            vote_flag as user_voted
         FROM
             votes
         WHERE
-            user_id = 2
+            user_id = '?'
             AND r.id = recipe_id), COALESCE(sum(vote_flag), 0) AS vote_count
     FROM
         votes v
@@ -29,4 +29,5 @@ GROUP BY
     r.user_id
 ORDER BY
     vote_count DESC;
+
 

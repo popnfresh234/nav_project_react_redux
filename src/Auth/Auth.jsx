@@ -4,7 +4,7 @@ import auth0 from 'auth0-js';
 import axios from 'axios';
 import store from '../Index.jsx';
 import {
-  setLoggedIn, userProfileSuccess, userProfileLoading, userProfileRejected, setAccessToken,
+  setLoggedIn, userProfileSuccess, userProfileLoading, userProfileRejected, setAuthData,
 } from '../redux/actions/authActions';
 
 class Auth {
@@ -64,32 +64,41 @@ class Auth {
     store.dispatch( setLoggedIn( true ) );
     const expiresAt = ( authResult.expiresIn * 1000 ) + new Date().getTime();
     this.accessToken = authResult.accessToken;
-    store.dispatch( setAccessToken( authResult.accessToken ) );
+    store.dispatch( setAuthData( { accessToken: authResult.accessToken, sub: authResult.idTokenPayload.sub } ) );
     this.idToken = authResult.idToken;
     this.expiresAt = expiresAt;
-    this.getProfile();
-    // navigate to the home route if not renewing
-    if ( !renew ) {
-      this.history.replace( '/home' ); // This takes us away from callback route
-    }
+    store.dispatch( userProfileLoading() );
+    this.getProfile()
+      .then( ( profile ) => {
+        store.dispatch( userProfileSuccess( profile ) );
+        // navigate to the home route if not renewing
+        if ( !renew ) {
+          this.history.replace( '/home' ); // This takes us away from callback route
+        }
+      } )
+      .catch( ( err ) => {
+        store.dispatch( userProfileRejected( err.message ) );
+        this.history.replace( '/home' );
+      } );
   }
 
   // Get user profile
   getProfile() {
-    store.dispatch( userProfileLoading() );
-    this.auth0.client.userInfo( this.accessToken, ( err, profile ) => {
-      if ( profile ) {
-        this.userProfile = profile;
-        const headers = {
-          Authorization: `Bearer ${this.accessToken}`,
-        };
-        axios.post( 'http://localhost:8081/api/profile', profile, { headers } )
-          .then( ( result ) => {
-            store.dispatch( userProfileSuccess( result.data ) );
-          } ).catch( ( err ) => {
-            store.dispatch( userProfileRejected( err.message ) );
-          } );
-      }
+    return new Promise( ( resolve, reject ) => {
+      this.auth0.client.userInfo( this.accessToken, ( err, profile ) => {
+        if ( profile ) {
+          this.userProfile = profile;
+          const headers = {
+            Authorization: `Bearer ${this.accessToken}`,
+          };
+          axios.post( 'http://localhost:8081/api/profile', profile, { headers } )
+            .then( ( result ) => {
+              resolve( result.data );
+            } ).catch( ( error ) => {
+              reject( error );
+            } );
+        }
+      } );
     } );
   }
 

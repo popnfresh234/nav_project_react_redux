@@ -49,6 +49,7 @@ class App extends Component {
 
   render() {
     return (
+
       <Layout>
         <NavBar auth={this.auth} />
         <Layout style={{ minHeight: '100vh' }}>
@@ -99,6 +100,7 @@ class App extends Component {
           <Footer style={{ textAlign: 'center' }}>Ant Design ©2018 Created by Ant UED</Footer>
         </Layout>
       </Layout>
+
     );
   }
 }

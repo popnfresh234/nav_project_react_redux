@@ -12,7 +12,7 @@ class Callback extends Component {
       bottom: 0,
       left: 0,
       right: 0,
-      backgroundColor: 'blue',
+      backgroundColor: 'white',
     };
     return (
       <div style={style}>
